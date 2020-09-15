@@ -15,8 +15,8 @@ from torchvision import transforms
 
 # Base architectures
 vgg = torchvision.models.vgg16(pretrained=True)
-resnet = torchvision.models.resnet152(pretrained=True)
 vgg.eval()
+resnet = torchvision.models.resnet152(pretrained=True)
 resnet.eval()
 
 
@@ -45,7 +45,7 @@ def vgg16_fms(img):
 
     Parameters
     ----------
-    img : :class:`troch.Tensor`
+    img : :class:`torch.Tensor`
         Input image, a tensor of shape (3, 224, 224).
 
     Returns
@@ -66,12 +66,12 @@ def vgg16_fms(img):
 
 
 def resnet152_fms(img):
-    """Get feature maps from pre-trained Resnet152. Feature extracted by saving
-    model output at the 4th, 5th, 6th, 7th and 8th layer of Resnet152.
+    """Get feature maps from pre-trained ResNet152. conv1, conv2_x, conv3_x,
+    conv4_x, and conv5_x are used for feature map generation.
 
     Parameters
     ----------
-    image : :class:`troch.Tensor`
+    image : :class:`torch.Tensor`
         Input image, a tensor of shape (3, 224, 224).
 
     Returns
@@ -108,7 +108,8 @@ def main(args):
         images = list(os.listdir(args.data))
         num_images = len(images)
         for model in ['plain', 'vgg', 'resnet']:
-            fms, fm_save_path = torch.tensor([]), 'fm_' + model
+            fms = torch.tensor([])
+            fm_save_path = 'fm_' + args.label + '_' + model
             for ix in tqdm(range(num_images), total=num_images, desc=model):
                 im_path = os.path.join(args.data, images[ix])
                 if model == 'plain':  # simply use the images as features
@@ -127,7 +128,9 @@ if __name__ == "__main__":
     pparser = argparse.ArgumentParser()
     pparser.add_argument('--data', help='Path to dataset.')
     pparser.add_argument('--use-cuda', type=str, default='0',
-                         help='Which GPU to use')
+                         help='Which GPU to use?')
+    pparser.add_argument('--label', type=str, required=True,
+                         choices=['train', 'test', 'synthetic'])
     args = pparser.parse_args()
     args.device = 'cuda:' + args.use_cuda if torch.cuda.is_available() \
         else 'cpu'
